@@ -1,0 +1,3 @@
+[submodule "tools/xfel"]
+	path = tools/xfel
+	url = https://github.com/xboot/xfel
