@@ -1,7 +1,7 @@
 #include "gpio.h"
 #include <std/spinlock.h>
 
-SpinLock gpio_lock;
+static SpinLock gpio_lock;
 
 void hal_gpio_init(void) {
     spinlock_init(&gpio_lock);

@@ -60,11 +60,10 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
     -fno-math-errno
     -MMD
     -MP
-    --specs=nano.specs
-    -u _printf_float
+    -ffreestanding
 
-    # -Werror
-    # -Wextra
+    -Werror
+    -Wextra
     $<$<COMPILE_LANGUAGE:C>:-std=gnu2x>
     $<$<COMPILE_LANGUAGE:C>:-Wenum-conversion>
     $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
@@ -82,13 +81,10 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
     -mfpu=neon-vfpv4
     -mfloat-abi=hard
     -T ${LINKER_SCRIPT}
-    --specs=nosys.specs
+    -nostdlib
     -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map
     -Wl,--gc-sections -static
-    -Wl,--undefined=uxTopUsedPriority
-    --specs=nano.specs
     -fno-math-errno
-    -u _printf_float
     -fstack-usage
     -Wl,--start-group -lstdc++ -lsupc++
     -Wl,--end-group

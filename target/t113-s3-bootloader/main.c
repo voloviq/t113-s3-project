@@ -30,13 +30,19 @@ void IRQ_Handler(void) {
 void SystemInit(void) {
 }
 
+int main(void);
+
+void _start(void) {
+    main();
+}
+
 #include <hal/gpio.h>
 #include <std/common.h>
 
 int main(void) {
     // led gpio PD22/PWM7
     hal_gpio_init();
-    hal_gpio_set_config(GPIOD, 22, gpio_config_output);
+    hal_gpio_set_config(GPIOD, 22, GpioConfigOutput);
 
     while(true) {
         hal_gpio_write(GPIOD, 22, 1);
