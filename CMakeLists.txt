@@ -32,6 +32,11 @@ file(GLOB ASM_SOURCES
     "target/t113-s3-bootloader/crt_CortexA.S"
 )
 
+include_directories(
+    "${CMAKE_SOURCE_DIR}/lib"
+    "${CMAKE_SOURCE_DIR}/target/t113-s3-bootloader"
+)
+
 set(SOURCES
     ${SOURCES}
     ${ASM_SOURCES}
@@ -68,6 +73,8 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-fno-use-cxa-atexit>
     $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
     $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>
+
+    -DCPUSTYLE_T113
 )
 
 target_link_options(${PROJECT_NAME}.elf PRIVATE
@@ -88,6 +95,37 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
     -Wl,--print-memory-usage -T ${LINKER_SCRIPT}
 )
 
-add_custom_target(reset
-    "${XFEL} reset"
-    COMMENT "Reset the target via xfel")
+# Print size
+add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
+    COMMAND ${SIZE} ${PROJECT_NAME}.elf)
+
+set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
+set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
+
+# Make binary file.
+add_custom_command(
+    OUTPUT ${HEX_FILE}
+    DEPENDS ${PROJECT_NAME}.elf
+    COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
+    COMMENT "Building ${HEX_FILE}"
+)
+
+add_custom_command(
+    OUTPUT ${BIN_FILE}
+    DEPENDS ${PROJECT_NAME}.elf
+    COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
+    COMMENT "Building ${BIN_FILE}"
+)
+
+add_custom_target(
+    reset
+    ${XFEL} reset
+    COMMENT "Reset the target via xfel"
+)
+
+add_custom_target(
+    flash_xfel_to_ddr
+    ${XFEL} ddr t113-s3 && ${XFEL} write 0x40000000 ${BIN_FILE} && ${XFEL} exec 0x40000000
+    DEPENDS ${BIN_FILE}
+    COMMENT "Flash the target DDR mem via xfel"
+)

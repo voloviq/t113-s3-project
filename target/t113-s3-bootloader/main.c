@@ -1,3 +1,7 @@
+#include <stddef.h>
+#include <stdbool.h>
+#include <t113s3/cmsis_t113s3.h>
+
 // Cortex-A7/A9 handlers
 void Undef_Handler(void) {
 }
@@ -26,6 +30,20 @@ void IRQ_Handler(void) {
 void SystemInit(void) {
 }
 
+#include <hal/gpio.h>
+#include <std/common.h>
+
 int main(void) {
+    // led gpio PD22/PWM7
+    hal_gpio_init();
+    hal_gpio_set_config(GPIOD, 22, gpio_config_output);
+
+    while(true) {
+        hal_gpio_write(GPIOD, 22, 1);
+        delay_nop(500000);
+        hal_gpio_write(GPIOD, 22, 0);
+        delay_nop(500000);
+    }
+
     return 0;
 }
